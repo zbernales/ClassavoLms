@@ -2,12 +2,12 @@ import axios from "axios";
 
 const API_BASE = "http://127.0.0.1:8000/api/";
 
-// Store JWT access token in memory
-let accessToken = null;
+// Store JWT access token in memory and persist it in localStorage
+let accessToken = localStorage.getItem("accessToken") || null;
 
-// Function to set the access token after login
 export const setAccessToken = (token) => {
   accessToken = token;
+  localStorage.setItem("accessToken", token); // persist token
 };
 
 // Create an Axios instance for authenticated requests
@@ -26,6 +26,10 @@ API.interceptors.request.use((config) => {
 // API calls
 export const getCourses = () => API.get("courses/");
 export const getChapters = () => API.get("chapters/");
+export const joinCourse = (courseId) => API.post(`courses/${courseId}/join/`);
+export const createCourse = (courseData) => API.post("courses/", courseData);
+export const getCurrentUser = () => API.get("current-user/");
+export const getMyCourses = () => API.get("/my-courses/");
 
 // Login function (gets JWT token)
 export const login = async (username, password) => {

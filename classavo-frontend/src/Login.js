@@ -1,27 +1,26 @@
 import { useState } from "react";
-import { login } from "./api"; // use the login function from api.js
+import { login, getCurrentUser } from "./api";
 import { useNavigate } from "react-router-dom";
 
-function Login() {
+function Login({ setUser }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const navigate = useNavigate(); // for redirecting after login
+  const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
 
     try {
-      // Call the login function from api.js
-      const response = await login(username, password);
+      await login(username, password);
 
-      console.log("Logged in!", response.data);
+      const userRes = await getCurrentUser();
+      setUser(userRes.data);
+
       alert("Login successful!");
-
-      // Redirect to the courses page after login
       navigate("/");
     } catch (error) {
       console.error("Login error:", error);
-      alert("Login failed. Please check your credentials.");
+      alert("Login failed. Check credentials.");
     }
   };
 
