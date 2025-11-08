@@ -2,7 +2,7 @@ from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import viewsets
 from .models import Course, Chapter
-from .serializers import CourseSerializer, ChapterSerializer
+from .serializers import CourseSerializer, ChapterSerializer, UserSerializer
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly, BasePermission, SAFE_METHODS, AllowAny
 
 @api_view(['GET'])
@@ -37,15 +37,64 @@ class CourseViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(instructor=self.request.user)
     
+    def retrieve(self, request, *args, **kwargs):
+        course = self.get_object()
+        return Response(self.get_serializer(course).data)
+    
     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
     def join(self, request, pk=None):
         course = self.get_object()  
         user = request.user
         course.students.add(user)
         return Response({"message": f"You have joined {course.title}"})
+    
+    @action(detail=True, methods=["get"])
+    def students(self, request, pk=None):
+        course = self.get_object()
+        enrolled = course.students.all()
+        return Response(UserSerializer(enrolled, many=True).data)
+
+    @action(detail=True, methods=["delete"], url_path="students/(?P<user_id>[^/.]+)")
+    def remove_student(self, request, pk=None, user_id=None):
+        course = self.get_object()
+        student = course.students.filter(id=user_id).first()
+        if not student:
+            return Response({"detail": "Student not found"}, status=404)
+        course.students.remove(student)
+        return Response(status=204)
+
+    @action(detail=True, methods=["post"])
+    def unenroll(self, request, pk=None):
+        course = self.get_object()
+        course.students.remove(request.user)
+        return Response({"message": "Unenrolled"}, status=200)
+    
+    def destroy(self, request, *args, **kwargs):
+        course = self.get_object()
+        if request.user != course.instructor:
+            return Response({"error": "Only instructor can delete"}, status=403)
+        return super().destroy(request, *args, **kwargs)
 
 class ChapterViewSet(viewsets.ModelViewSet):
     queryset = Chapter.objects.all()
     serializer_class = ChapterSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsInstructorOrReadOnly]
+
+    def get_queryset(self):
+        user = self.request.user
+        course_id = self.request.query_params.get('course')
+        if not course_id:
+            return Chapter.objects.none()  # No course selected
+
+        if user.profile.role == "instructor":
+            return Chapter.objects.filter(course_id=course_id)
+        else:
+            return Chapter.objects.filter(course_id=course_id, is_public=True, course__students=user)
+    
+    @action(detail=True, methods=["patch"])
+    def visibility(self, request, pk=None):
+        chapter = self.get_object()
+        chapter.is_public = not chapter.is_public
+        chapter.save()
+        return Response({"is_public": chapter.is_public})
 

@@ -30,6 +30,15 @@ export const joinCourse = (courseId) => API.post(`courses/${courseId}/join/`);
 export const createCourse = (courseData) => API.post("courses/", courseData);
 export const getCurrentUser = () => API.get("current-user/");
 export const getMyCourses = () => API.get("/my-courses/");
+export const getCourseDetails = (id) => API.get(`/courses/${id}/`);
+export const getChaptersByCourse = (id) => API.get(`/chapters/?course=${id}`);
+export const getStudentsByCourse = (id) => API.get(`/courses/${id}/students/`);
+export const removeStudentFromCourse = (courseId, userId) =>
+  API.delete(`/courses/${courseId}/students/${userId}/`);
+export const deleteCourse = (id) => API.delete(`/courses/${id}/`);
+export const unenrollCourse = (id) => API.post(`/courses/${id}/unenroll/`);
+export const toggleChapterVisibility = (id) =>
+  API.patch(`/chapters/${id}/visibility/`);
 
 // Login function (gets JWT token)
 export const login = async (username, password) => {

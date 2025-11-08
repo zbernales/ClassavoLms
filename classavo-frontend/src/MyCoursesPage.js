@@ -17,6 +17,10 @@ function MyCoursesPage({ user }) {
       .catch(() => setCourses([]));
   }, [user, navigate]);
 
+  const goToCourse = (courseId) => {
+    navigate(`/courses/${courseId}`);
+  };
+
   return (
     <div>
       <h2>
@@ -28,8 +32,12 @@ function MyCoursesPage({ user }) {
       ) : (
         <ul>
           {courses.map(course => (
-            <li key={course.id}>
-              <strong>{course.title}</strong> - {course.description}
+            <li
+              key={course.id}
+              onClick={() => goToCourse(course.id)}
+              style={{ cursor: "pointer", marginBottom: "10px" }}
+            >
+              <strong>{course.title}</strong> — {course.description}
             </li>
           ))}
         </ul>

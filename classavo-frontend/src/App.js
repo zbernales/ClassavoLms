@@ -5,6 +5,7 @@ import Login from "./Login"
 import { getCourses, joinCourse, getCurrentUser } from './api';
 import CreateCoursePage from "./CreateCoursePage";
 import MyCoursesPage from './MyCoursesPage';
+import CourseDetailPage from "./CourseDetailPage";
 
 function CoursesPage({ user }) {
   const [courses, setCourses] = useState([]);
@@ -80,6 +81,7 @@ function App() {
         <Route path="/create-course" element={<CreateCoursePage user={user}/>} />
       )}
       <Route path="/my-courses" element={<MyCoursesPage user={user} />} />
+      <Route path="/courses/:id" element={<CourseDetailPage user={user}/>} />
     </Routes>
   </>
 ) ;
