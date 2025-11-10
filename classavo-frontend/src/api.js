@@ -40,13 +40,15 @@ export const toggleChapterVisibility = (id) => API.patch(`/chapters/${id}/toggle
 export const createChapter = (chapterData) => API.post("chapters/", chapterData);
 export const updateChapter = (id, data) => API.patch(`/chapters/${id}/update_chapter/`, data);
 export const deleteChapter = (id) => API.delete(`/chapters/${id}/delete_chapter/`);
-
-// Login function (gets JWT token)
+export const signUpUser = async (userData) => {
+  const response = await API.post("signup/", userData);
+  return response.data;
+};
 export const login = async (username, password) => {
   const response = await axios.post("http://127.0.0.1:8000/api/token/", {
     username,
     password,
   });
-  setAccessToken(response.data.access); // store the access token
+  setAccessToken(response.data.access); 
   return response;
 };

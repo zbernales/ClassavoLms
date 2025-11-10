@@ -12,7 +12,7 @@ import {
   updateChapter,
   toggleChapterVisibility,
 } from "./api";
-import { Tabs, Tab, fabClasses } from "@mui/material";
+import { Tabs, Tab } from "@mui/material";
 import ChapterEditor from "./ChapterEditor"; 
 import ChapterViewer from "./ChapterViewer";
 
@@ -252,7 +252,7 @@ function CourseDetailPage({ user }) {
                         </button>
                       </div>
                     )}
-                    
+
                     {isExpanded && (
                       <div style={{ marginTop: 12, padding: 12, background: "#fafafa", borderRadius: 6 }}>
                         <ChapterViewer content={ch.content} />
@@ -273,7 +273,7 @@ function CourseDetailPage({ user }) {
           <h3>Students</h3>
           {students.map(s => (
             <li key={s.id}>
-              {s.username} ({s.email})
+              {s.first_name} {s.last_name} ({s.email})
               {isInstructor && s.id !== user.id && (
                 <button onClick={() => handleRemoveStudent(s.id)} style = {{ color: "red", marginLeft: 5}}>
                   Remove ❌

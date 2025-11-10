@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
+import { Routes, Route, Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import Login from "./Login"
 import { getCourses, getMyCourses, joinCourse, getCurrentUser } from './api';
 import CreateCoursePage from "./CreateCoursePage";
 import MyCoursesPage from './MyCoursesPage';
 import CourseDetailPage from "./CourseDetailPage";
+import SignUpPage  from './SignUpPage';
 
 function CoursesPage({ user }) {
   const [courses, setCourses] = useState([]);
@@ -67,12 +68,23 @@ function CoursesPage({ user }) {
 
 function Navbar({ user, onLogout }) {
   return (
-    <nav style={{ marginBottom: "20px" }}>
-      <Link to="/">Courses</Link> |{" "}
-      {user && <Link to="/my-courses">My Courses</Link>} |{" "}
-      {user?.role === "instructor" && <Link to="/create-course">Create Course</Link>} | {" "}
-      {!user && <Link to="/login">Login</Link>} 
-      {user && <button onClick={onLogout} style={{ marginLeft: "5px" }}>Logout</button>} |{" "}
+    <nav style={{ marginBottom: "20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <div>
+        <Link to="/">Courses</Link> |{" "}
+        {user && <Link to="/my-courses">My Courses</Link>} |{" "}
+        {user?.role === "instructor" && <Link to="/create-course">Create Course</Link>} |{" "}
+        {!user && <Link to="/login">Login</Link>} |{" "}
+        {!user && <Link to="/signup">Sign Up</Link>}
+      </div>
+
+      {user && (
+        <div>
+          <span style={{ marginRight: "10px" }}>
+            Welcome, {user.first_name} {user.last_name}
+          </span>
+          <button onClick={onLogout}>Logout</button>
+        </div>
+      )}
     </nav>
   );
 }
@@ -101,6 +113,7 @@ function App() {
     <Routes>
       <Route path="/" element={<CoursesPage user={user} />} />
       <Route path="/login" element={<Login setUser={setUser} />} />
+      <Route path="/signup" element={<SignUpPage />} />
       {user?.role === "instructor" && (
         <Route path="/create-course" element={<CreateCoursePage user={user}/>} />
       )}
