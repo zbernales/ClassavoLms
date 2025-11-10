@@ -33,12 +33,13 @@ export const getMyCourses = () => API.get("/my-courses/");
 export const getCourseDetails = (id) => API.get(`/courses/${id}/`);
 export const getChaptersByCourse = (id) => API.get(`/chapters/?course=${id}`);
 export const getStudentsByCourse = (id) => API.get(`/courses/${id}/students/`);
-export const removeStudentFromCourse = (courseId, userId) =>
-  API.delete(`/courses/${courseId}/students/${userId}/`);
+export const removeStudentFromCourse = (courseId, userId) => API.delete(`/courses/${courseId}/students/${userId}/`);
 export const deleteCourse = (id) => API.delete(`/courses/${id}/`);
 export const unenrollCourse = (id) => API.post(`/courses/${id}/unenroll/`);
-export const toggleChapterVisibility = (id) =>
-  API.patch(`/chapters/${id}/visibility/`);
+export const toggleChapterVisibility = (id) => API.patch(`/chapters/${id}/toggle_visibility/`);
+export const createChapter = (chapterData) => API.post("chapters/", chapterData);
+export const updateChapter = (id, data) => API.patch(`/chapters/${id}/update_chapter/`, data);
+export const deleteChapter = (id) => API.delete(`/chapters/${id}/delete_chapter/`);
 
 // Login function (gets JWT token)
 export const login = async (username, password) => {

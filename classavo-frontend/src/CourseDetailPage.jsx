@@ -6,46 +6,76 @@ import {
   getStudentsByCourse,
   removeStudentFromCourse,
   deleteCourse,
-  unenrollCourse
+  unenrollCourse,
+  createChapter,
+  deleteChapter,
+  updateChapter,
+  toggleChapterVisibility,
 } from "./api";
-import { Tabs, Tab } from "@mui/material"; 
+import { Tabs, Tab, fabClasses } from "@mui/material";
+import ChapterEditor from "./ChapterEditor"; // ✅ Import Plate Editor
 
 function CourseDetailPage({ user }) {
   const { id: courseId } = useParams();
   const navigate = useNavigate();
-  
+
   const [course, setCourse] = useState(null);
   const [chapters, setChapters] = useState([]);
   const [students, setStudents] = useState([]);
-  const [tab, setTab] = useState(0); 
+  const [tab, setTab] = useState(0);
+
+  const [isEditorOpen, setIsEditorOpen] = useState(false);
+  const [editorValue, setEditorValue] = useState([
+    {
+      type: "p",
+      children: [{ text: "" }],
+    },
+  ]);
+  const [newChapterTitle, setNewChapterTitle] = useState("");
+  const [editingChapterId, setEditingChapterId] = useState(null);
 
   const isInstructor = user?.role === "instructor";
+
   useEffect(() => {
-    if (user === undefined) return; 
-    if (!courseId || courseId === "undefined") return; 
+    if (!user) return navigate("/login");
+    if (!courseId || courseId === "undefined") return;
 
-    if (user === null) {
-        navigate("/login");
-        return;
-    }
-
-    // ✅ Load course info
     getCourseDetails(courseId)
       .then(res => setCourse(res.data))
       .catch(() => navigate("/my-courses"));
 
-    // ✅ Load chapters filtered by role (backend handles)
     getChaptersByCourse(courseId)
       .then(res => setChapters(res.data))
       .catch(() => setChapters([]));
 
-    // ✅ Load students
     getStudentsByCourse(courseId)
       .then(res => setStudents(res.data))
       .catch(() => setStudents([]));
+
   }, [courseId, user, navigate]);
 
+  const handleSaveChapter = () => {
+  const payload = {
+    title: newChapterTitle,
+    content: JSON.stringify(editorValue), 
+    course: courseId,
+    is_public: false,
+  };
+
+  createChapter(payload)
+    .then(res => {
+      setChapters(prev => [...prev, res.data]);
+      setIsEditorOpen(false);
+      setNewChapterTitle("");
+      setEditorValue([{ type: "p", children: [{ text: "" }] }]);
+    })
+    .catch(err => console.error("Chapter create error:", err));
+};
+
   const handleRemoveStudent = (studentId) => {
+    if (!window.confirm("Are you sure you want to remove this student from the course?"))
+      return;
+
     removeStudentFromCourse(courseId, studentId)
       .then(() =>
         setStudents(prev => prev.filter(s => s.id !== studentId))
@@ -53,12 +83,67 @@ function CourseDetailPage({ user }) {
   };
 
   const handleDeleteCourse = () => {
+    if (!window.confirm("Are you sure you want to permanently delete this course? All chapters and data will be removed."))
+      return;
+
     deleteCourse(courseId).then(() => navigate("/my-courses"));
   };
 
   const handleUnenroll = () => {
+    if (!window.confirm("Are you sure you want to unenroll from this course?"))
+      return;
+
     unenrollCourse(courseId).then(() => navigate("/my-courses"));
   };
+
+  const handleDeleteChapter = (chapterId) => {
+    if (!window.confirm("Are you sure you want to delete this chapter? This action cannot be undone."))
+      return;
+
+    deleteChapter(chapterId)
+      .then(() =>
+      setChapters(prevChapters =>
+        prevChapters.filter(ch => ch.id !== chapterId)
+      )
+    )
+    .catch(err => console.error("Delete chapter error:", err));
+  };
+  
+  const handleEditChapter = (chapterId) => {
+    const payload = {
+      title: newChapterTitle,
+      content: JSON.stringify(editorValue),
+    };
+
+    updateChapter(chapterId, payload)
+      .then(res => {
+        setChapters(prev =>
+          prev.map(ch =>
+            ch.id === chapterId ? res.data : ch
+          )
+        );
+        setEditingChapterId(null)
+        setIsEditorOpen(false);
+        setNewChapterTitle("");
+        setEditorValue([{ type: "p", children: [{ text: "" }] }]);
+      })
+      .catch(err => console.error("Chapter update error:", err));
+};
+
+  const handleToggleVisibility = (chapterId) => {
+    toggleChapterVisibility(chapterId)
+      .then(res => {
+        setChapters(prevChapters =>
+          prevChapters.map(ch =>
+            ch.id === chapterId ? { ...ch, is_public: res.data.is_public } : ch
+          )
+        );
+      })
+      .catch(err => console.error("Toggle visibility error:", err));
+  };
+
+
+  
 
   if (!course) return <p>Loading...</p>;
 
@@ -72,14 +157,48 @@ function CourseDetailPage({ user }) {
         <Tab label="Settings" />
       </Tabs>
 
-      {/* ✅ CHAPTER TAB */}
+      {/* ✅ Chapter Tab */}
       {tab === 0 && (
         <div>
           <h3>Chapters</h3>
+
           {isInstructor && (
-            <button onClick={() => alert("Open Plate.js editor here")}>
+            <button onClick={() => setIsEditorOpen(true)}>
               ➕ Create Chapter
             </button>
+          )}
+
+          {isEditorOpen && (
+            <div style={{ marginTop: 16, padding: 16, border: "1px solid #ccc" }}>
+              <input
+                type="text"
+                placeholder="Chapter title"
+                value={newChapterTitle}
+                onChange={(e) => setNewChapterTitle(e.target.value)}
+                style={{ width: "100%", marginBottom: 10 }}
+              />
+
+              <ChapterEditor value={editorValue} onChange={setEditorValue} />
+
+              <div style={{ marginTop: 10 }}>
+                <button
+                  onClick={() =>
+                    editingChapterId
+                      ? handleEditChapter(editingChapterId)
+                      : handleSaveChapter()
+                  }
+                  disabled={!newChapterTitle}
+                >
+                  ✅ Save
+                </button>
+                <button
+                  onClick={() => setIsEditorOpen(false)}
+                  style={{ marginLeft: 10 }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
           )}
 
           {chapters.length === 0 ? (
@@ -93,11 +212,22 @@ function CourseDetailPage({ user }) {
                   
                   {isInstructor && (
                     <>
-                      <button style={{ marginLeft: 10 }}>
+                      <button onClick={() => handleToggleVisibility(ch.id)} style={{ marginLeft: 10 }}>
+                        Toggle Visibility
+                      </button>
+                      <button
+                        onClick={() => {
+                          setEditingChapterId(ch.id)
+                          setNewChapterTitle(ch.title);
+                          setEditorValue(JSON.parse(ch.content || '[{"type":"p","children":[{"text":""}]}]'));
+                          setIsEditorOpen(true);
+                        }}
+                        style={{ marginLeft: 5 }}
+                      >
                         Edit
                       </button>
-                      <button style={{ marginLeft: 5 }}>
-                        Toggle Visibility
+                      <button onClick={() => handleDeleteChapter(ch.id)} style={{ color: "red", marginLeft: 5 }}>
+                        Delete Chapter ❌
                       </button>
                     </>
                   )}
@@ -108,31 +238,24 @@ function CourseDetailPage({ user }) {
         </div>
       )}
 
-      {/* ✅ STUDENT TAB */}
+      {/* Students Tab */}
       {tab === 1 && (
         <div>
           <h3>Students</h3>
-          {students.length === 0 ? (
-            <p>No students yet.</p>
-          ) : (
-            <ul>
-              {students.map(s => (
-                <li key={s.id}>
-                  {s.username} ({s.email})
-                  {isInstructor && s.id !== user.id && (
-                    <button style={{ marginLeft: 10 }} 
-                      onClick={() => handleRemoveStudent(s.id)}>
-                      Remove
-                    </button>
-                  )}
-                </li>
-              ))}
-            </ul>
-          )}
+          {students.map(s => (
+            <li key={s.id}>
+              {s.username} ({s.email})
+              {isInstructor && s.id !== user.id && (
+                <button onClick={() => handleRemoveStudent(s.id)} style = {{ color: "red", marginLeft: 5}}>
+                  Remove ❌
+                </button>
+              )}
+            </li>
+          ))}
         </div>
       )}
 
-      {/* ✅ SETTINGS TAB */}
+      {/* Settings Tab */}
       {tab === 2 && (
         <div>
           <h3>Settings</h3>

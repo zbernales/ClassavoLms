@@ -63,7 +63,7 @@ class CourseViewSet(viewsets.ModelViewSet):
         course.students.remove(student)
         return Response(status=204)
 
-    @action(detail=True, methods=["post"])
+    @action(detail=True, methods=["post"], permission_classes=[IsAuthenticated])
     def unenroll(self, request, pk=None):
         course = self.get_object()
         course.students.remove(request.user)
@@ -78,13 +78,19 @@ class CourseViewSet(viewsets.ModelViewSet):
 class ChapterViewSet(viewsets.ModelViewSet):
     queryset = Chapter.objects.all()
     serializer_class = ChapterSerializer
-    permission_classes = [IsAuthenticated, IsInstructorOrReadOnly]
+    permission_classes = [IsInstructorOrReadOnly]
+    def perform_create(self, serializer):
+        serializer.save(course_id=self.request.data.get("course"))
 
     def get_queryset(self):
         user = self.request.user
+
+        if self.action in ['retrieve', 'toggle_visibility', 'delete_chapter', 'update_chapter']:
+            return Chapter.objects.all()
+
         course_id = self.request.query_params.get('course')
         if not course_id:
-            return Chapter.objects.none()  # No course selected
+            return Chapter.objects.none()
 
         if user.profile.role == "instructor":
             return Chapter.objects.filter(course_id=course_id)
@@ -92,9 +98,36 @@ class ChapterViewSet(viewsets.ModelViewSet):
             return Chapter.objects.filter(course_id=course_id, is_public=True, course__students=user)
     
     @action(detail=True, methods=["patch"])
-    def visibility(self, request, pk=None):
+    def toggle_visibility(self, request, pk=None):
         chapter = self.get_object()
         chapter.is_public = not chapter.is_public
         chapter.save()
         return Response({"is_public": chapter.is_public})
+    
+    
+    @action(detail=True, methods=["delete"], permission_classes=[IsAuthenticated])
+    def delete_chapter(self, request, pk=None):
+        chapter = self.get_object()
+        if request.user.profile.role != "instructor":
+            return Response({"error": "Only instructors can delete chapters"}, status=403)
+        chapter.delete()
+        return Response(status=204)
+    
+    @action(detail=True, methods=["patch"])
+    def update_chapter(self, request, pk=None):
+        print(request.data)
+        chapter = self.get_object()
+
+        serializer = self.get_serializer(
+            chapter,
+            data=request.data,
+            partial=True  
+        )
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+
+        return Response(serializer.errors, status=400)
+
 
