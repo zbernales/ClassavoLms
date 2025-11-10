@@ -1,0 +1,73 @@
+.courses-container {
+  padding: 40px 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: 'Arial', sans-serif;
+}
+
+.courses-title {
+  text-align: center;
+  margin-bottom: 30px;
+  color: #333;
+  font-size: 2rem;
+}
+
+.courses-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.course-card {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.course-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+.course-title {
+  margin: 0 0 5px;
+  color: #4facfe;
+}
+
+.course-instructor {
+  margin: 0 0 10px;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.course-description {
+  flex-grow: 1;
+  font-size: 1rem;
+  color: #666;
+  margin-bottom: 15px;
+}
+
+.join-button {
+  padding: 10px 0;
+  border: none;
+  border-radius: 8px;
+  background: #4facfe;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.join-button:hover {
+  background: #00f2fe;
+}
+
+.join-button.joined {
+  background: #ccc;
+  cursor: not-allowed;
+}

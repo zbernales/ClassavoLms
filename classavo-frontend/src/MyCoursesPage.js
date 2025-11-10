@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { getMyCourses } from "./api";
 import { useNavigate } from "react-router-dom";
+import "./MyCoursesPage.css";
 
 function MyCoursesPage({ user }) {
   const [courses, setCourses] = useState([]);
@@ -22,25 +23,26 @@ function MyCoursesPage({ user }) {
   };
 
   return (
-    <div>
-      <h2>
+    <div className="my-courses-container">
+      <h2 className="my-courses-title">
         {user?.role === "instructor" ? "Courses You Teach" : "Courses You're Enrolled In"}
       </h2>
 
       {courses.length === 0 ? (
-        <p>No courses yet.</p>
+        <p className="no-courses">No courses yet.</p>
       ) : (
-        <ul>
+        <div className="my-courses-grid">
           {courses.map(course => (
-            <li
+            <div
               key={course.id}
+              className="my-course-card"
               onClick={() => goToCourse(course.id)}
-              style={{ cursor: "pointer", marginBottom: "10px" }}
             >
-              <strong>{course.title}</strong> — {course.description}
-            </li>
+              <h3 className="course-title">{course.title}</h3>
+              <p className="course-description">{course.description}</p>
+            </div>
           ))}
-        </ul>
+        </div>
       )}
     </div>
   );

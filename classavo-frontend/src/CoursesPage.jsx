@@ -1,5 +1,6 @@
 import { getCourses, getMyCourses, joinCourse } from './api';
 import React, { useEffect, useState } from 'react';
+import "./CoursesPage.css";
 
 function CoursesPage({ user }) {
   const [courses, setCourses] = useState([]);
@@ -35,26 +36,28 @@ function CoursesPage({ user }) {
   };
 
   return (
-    <div>
-      <h1>Available Courses</h1>
-      <ul>
+    <div className="courses-container">
+      <h1 className="courses-title">Available Courses</h1>
+      <div className="courses-grid">
         {courses.map(course => (
-          <li key={course.id} style={{ marginBottom: "10px" }}>
-            <strong>{course.title}</strong> by <em>{course.instructor?.username || "Unknown"}</em>: {course.description}
+          <div key={course.id} className="course-card">
+            <h3 className="course-title">{course.title}</h3>
+            <p className="course-instructor">by <em>{course.instructor?.first_name || "Unknown"} {course.instructor?.last_name || ""}</em></p>
+            <p className="course-description">{course.description}</p>
             {user?.role === "student" && (
               <button
                 onClick={() => handleJoin(course.id)}
                 disabled={course.joined}
-                style={{ marginLeft: "10px" }}
+                className={`join-button ${course.joined ? 'joined' : ''}`}
               >
                 {course.joined ? "Joined" : "Join"}
               </button>
             )}
-          </li>
+          </div>
         ))}
-      </ul>
+      </div>
     </div>
   );
 }
 
-export default CoursesPage
+export default CoursesPage;
