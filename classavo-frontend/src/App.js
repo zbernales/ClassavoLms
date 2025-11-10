@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import Login from "./Login"
-import { getCourses, joinCourse, getCurrentUser } from './api';
+import { getCourses, getMyCourses, joinCourse, getCurrentUser } from './api';
 import CreateCoursePage from "./CreateCoursePage";
 import MyCoursesPage from './MyCoursesPage';
 import CourseDetailPage from "./CourseDetailPage";
@@ -11,15 +11,30 @@ function CoursesPage({ user }) {
   const [courses, setCourses] = useState([]);
 
   useEffect(() => {
-    getCourses()
-      .then(response => setCourses(response.data))
+    if (!user) return;
+
+    // Fetch all courses and the courses the student has joined
+    Promise.all([getCourses(), getMyCourses()])
+      .then(([allRes, myRes]) => {
+        const myCourseIds = myRes.data.map(c => c.id);
+        const coursesWithJoined = allRes.data.map(course => ({
+          ...course,
+          joined: myCourseIds.includes(course.id)
+        }));
+        setCourses(coursesWithJoined);
+      })
       .catch(error => console.error(error));
-  }, []);
+  }, [user]);
 
   const handleJoin = async (courseId) => {
     try {
       const response = await joinCourse(courseId);
       alert(response.data.message);
+      setCourses(prev =>
+        prev.map(course =>
+          course.id === courseId ? { ...course, joined: true } : course
+        )
+      );
     } catch (error) {
       console.error(error);
       alert("Failed to join course");
@@ -31,9 +46,17 @@ function CoursesPage({ user }) {
       <h1>Available Courses</h1>
       <ul>
         {courses.map(course => (
-          <li key={course.id}>
-            <strong>{course.title}</strong>: {course.description}
-            {user?.role === "student" && <button onClick={() => handleJoin(course.id)}>Join</button>}
+          <li key={course.id} style={{ marginBottom: "10px" }}>
+            <strong>{course.title}</strong> by <em>{course.instructor?.username || "Unknown"}</em>: {course.description}
+            {user?.role === "student" && (
+              <button
+                onClick={() => handleJoin(course.id)}
+                disabled={course.joined}
+                style={{ marginLeft: "10px" }}
+              >
+                {course.joined ? "Joined" : "Join"}
+              </button>
+            )}
           </li>
         ))}
       </ul>
@@ -41,14 +64,15 @@ function CoursesPage({ user }) {
   );
 }
 
+
 function Navbar({ user, onLogout }) {
   return (
     <nav style={{ marginBottom: "20px" }}>
       <Link to="/">Courses</Link> |{" "}
-      {user && <Link to="/my-courses">My Courses</Link>}
-      {!user && <Link to="/login">Login</Link>}
-      {user && <button onClick={onLogout} style={{ marginLeft: "10px" }}>Logout</button>} |{" "}
-      {user?.role === "instructor" && <Link to="/create-course">Create Course</Link>}
+      {user && <Link to="/my-courses">My Courses</Link>} |{" "}
+      {user?.role === "instructor" && <Link to="/create-course">Create Course</Link>} | {" "}
+      {!user && <Link to="/login">Login</Link>} 
+      {user && <button onClick={onLogout} style={{ marginLeft: "5px" }}>Logout</button>} |{" "}
     </nav>
   );
 }
@@ -75,7 +99,7 @@ function App() {
   <>
     <Navbar user={user} onLogout={handleLogout} />
     <Routes>
-      <Route path="/" element={<CoursesPage />} />
+      <Route path="/" element={<CoursesPage user={user} />} />
       <Route path="/login" element={<Login setUser={setUser} />} />
       {user?.role === "instructor" && (
         <Route path="/create-course" element={<CreateCoursePage user={user}/>} />
