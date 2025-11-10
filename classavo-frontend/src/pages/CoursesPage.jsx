@@ -1,6 +1,6 @@
-import { getCourses, getMyCourses, joinCourse } from './api';
+import { getCourses, getMyCourses, joinCourse } from '../api/api';
 import React, { useEffect, useState } from 'react';
-import "./CoursesPage.css";
+import "../styles/CoursesPage.css";
 
 function CoursesPage({ user }) {
   const [courses, setCourses] = useState([]);
@@ -45,7 +45,7 @@ function CoursesPage({ user }) {
       </div>
     );
   }
-  
+
   return (
     <div className="courses-container">
       <h1 className="courses-title">Available Courses</h1>

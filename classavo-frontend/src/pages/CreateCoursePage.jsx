@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { createCourse } from "./api";
+import { createCourse } from "../api/api";
 import { useNavigate } from "react-router-dom";
-import "./CreateCoursePage.css";
+import "../styles/CreateCoursePage.css";
 
 function CreateCoursePage() {
   const [title, setTitle] = useState("");

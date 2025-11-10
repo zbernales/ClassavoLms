@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { getMyCourses } from "./api";
+import { getMyCourses } from "../api/api";
 import { useNavigate } from "react-router-dom";
-import "./MyCoursesPage.css";
+import "../styles/MyCoursesPage.css";
 
 function MyCoursesPage({ user }) {
   const [courses, setCourses] = useState([]);

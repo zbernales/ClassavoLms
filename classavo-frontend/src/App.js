@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { Routes, Route, } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
-import Login from "./Login"
-import { getCurrentUser } from './api';
-import CreateCoursePage from "./CreateCoursePage";
-import MyCoursesPage from './MyCoursesPage';
-import CourseDetailPage from "./CourseDetailPage";
-import Signup  from './Signup';
-import CoursesPage from './CoursesPage';
-import Navbar from './Navbar';
+import Login from "./pages/Login"
+import { getCurrentUser } from './api/api';
+import CreateCoursePage from "./pages/CreateCoursePage";
+import MyCoursesPage from './pages/MyCoursesPage';
+import CourseDetailPage from "./pages/CourseDetailPage";
+import Signup  from './pages/Signup';
+import CoursesPage from './pages/CoursesPage';
+import Navbar from './components/Navbar';
 
 function App() {
   const [user, setUser] = useState(null)

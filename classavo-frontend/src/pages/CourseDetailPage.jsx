@@ -11,11 +11,11 @@ import {
   deleteChapter,
   updateChapter,
   toggleChapterVisibility,
-} from "./api";
+} from "../api/api";
 import { Tabs, Tab } from "@mui/material";
-import ChapterEditor from "./ChapterEditor"; 
-import ChapterViewer from "./ChapterViewer";
-import "./CourseDetailPage.css";
+import ChapterEditor from "../components/ChapterEditor"; 
+import ChapterViewer from "../components/ChapterViewer";
+import "../styles/CourseDetailPage.css";
 
 function CourseDetailPage({ user }) {
   const { id: courseId } = useParams();
