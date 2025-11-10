@@ -8,7 +8,7 @@ function Navbar({ user, onLogout }) {
         <Link to="/">Courses</Link>
         {user && <Link to="/my-courses">My Courses</Link>}
         {user?.role === "instructor" && <Link to="/create-course">Create Course</Link>}
-        {!user && <Link to="/login">Login</Link>}
+        {!user && <Link to="/login">Log in</Link>}
         {!user && <Link to="/signup">Sign Up</Link>}
       </div>
 

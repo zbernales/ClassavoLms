@@ -35,6 +35,17 @@ function CoursesPage({ user }) {
     }
   };
 
+    if (!user) {
+    return (
+      <div className="courses-container">
+        <h1 className="courses-title">Available Courses</h1>
+        <p className="login-message">
+          Please <strong>Log In</strong> to view and join courses.
+        </p>
+      </div>
+    );
+  }
+  
   return (
     <div className="courses-container">
       <h1 className="courses-title">Available Courses</h1>

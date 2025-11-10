@@ -17,7 +17,6 @@ import {
   BaseBlockquotePlugin,
 } from "@platejs/basic-nodes";
 
-// ---- Custom Renderers ----
 function H1Element(props: PlateElementProps) {
   return <PlateElement as="h1" style={{ fontSize: "2rem" }} {...props} />;
 }
@@ -45,7 +44,6 @@ function BlockquoteElement(props: PlateElementProps) {
   );
 }
 
-// ---- Component ----
 export default function ChapterEditor({ value, onChange }) {
   const editor = usePlateEditor({
     plugins: [
