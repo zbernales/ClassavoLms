@@ -1,0 +1,136 @@
+.course-detail-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+.course-title {
+  text-align: center;
+  color: #4facfe;
+  margin-bottom: 20px;
+}
+
+.course-tabs {
+  margin-bottom: 20px;
+}
+
+.tab-content {
+  margin-top: 20px;
+}
+
+.btn {
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  margin: 4px 0;
+  font-size: 0.9rem;
+}
+
+.btn.primary {
+  background-color: #4facfe;
+  color: #fff;
+}
+
+.btn.secondary {
+  background-color: #ccc;
+  color: #333;
+}
+
+.btn.danger {
+  background-color: #ff4d4f;
+  color: #fff;
+}
+
+.btn.small {
+  font-size: 0.75rem;
+  padding: 3px 6px;
+  margin-left: 6px;
+}
+
+.chapter-editor {
+  padding: 16px;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  background-color: #fafafa;
+  margin-bottom: 20px;
+}
+
+.input-field {
+  width: 100%;
+  padding: 6px 10px;
+  margin-bottom: 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.chapters-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.chapter-card {
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  padding: 12px;
+  background: #fff;
+}
+
+.chapter-header {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.expand-icon {
+  margin-right: 8px;
+}
+
+.private-tag {
+  margin-left: 8px;
+  color: #999;
+  font-size: 0.9rem;
+}
+
+.chapter-actions button {
+  margin-right: 8px;
+  margin-top: 6px;
+  transition: all 0.2s ease-in-out;
+}
+
+.chapter-actions button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+
+.chapter-content {
+  margin-top: 12px;
+  padding: 12px;
+  background-color: #fafafa;
+  border-radius: 8px;
+}
+
+.students-tab ul {
+  list-style: none;
+  padding: 0;
+}
+
+.student-item {
+  margin-bottom: 8px;
+}
+
+.public-tag {
+  color: green;
+  margin-left: 8px;
+  font-weight: 500;
+}
+
+.private-tag {
+  color: red;
+  margin-left: 8px;
+  font-weight: 500;
+}

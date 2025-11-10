@@ -15,6 +15,7 @@ import {
 import { Tabs, Tab } from "@mui/material";
 import ChapterEditor from "./ChapterEditor"; 
 import ChapterViewer from "./ChapterViewer";
+import "./CourseDetailPage.css";
 
 function CourseDetailPage({ user }) {
   const { id: courseId } = useParams();
@@ -27,10 +28,7 @@ function CourseDetailPage({ user }) {
 
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [editorValue, setEditorValue] = useState([
-    {
-      type: "p",
-      children: [{ text: "" }],
-    },
+    { type: "p", children: [{ text: "" }] },
   ]);
   const [newChapterTitle, setNewChapterTitle] = useState("");
   const [editingChapterId, setEditingChapterId] = useState(null);
@@ -57,58 +55,45 @@ function CourseDetailPage({ user }) {
   }, [courseId, user, navigate]);
 
   const handleSaveChapter = () => {
-  const payload = {
-    title: newChapterTitle,
-    content: JSON.stringify(editorValue), 
-    course: courseId,
-    is_public: false,
+    const payload = {
+      title: newChapterTitle,
+      content: JSON.stringify(editorValue), 
+      course: courseId,
+      is_public: false,
+    };
+
+    createChapter(payload)
+      .then(res => {
+        setChapters(prev => [...prev, res.data]);
+        setIsEditorOpen(false);
+        setNewChapterTitle("");
+        setEditorValue([{ type: "p", children: [{ text: "" }] }]);
+      })
+      .catch(err => console.error("Chapter create error:", err));
   };
 
-  createChapter(payload)
-    .then(res => {
-      setChapters(prev => [...prev, res.data]);
-      setIsEditorOpen(false);
-      setNewChapterTitle("");
-      setEditorValue([{ type: "p", children: [{ text: "" }] }]);
-    })
-    .catch(err => console.error("Chapter create error:", err));
-};
-
   const handleRemoveStudent = (studentId) => {
-    if (!window.confirm("Are you sure you want to remove this student from the course?"))
-      return;
+    if (!window.confirm("Are you sure you want to remove this student?")) return;
 
     removeStudentFromCourse(courseId, studentId)
-      .then(() =>
-        setStudents(prev => prev.filter(s => s.id !== studentId))
-      );
+      .then(() => setStudents(prev => prev.filter(s => s.id !== studentId)));
   };
 
   const handleDeleteCourse = () => {
-    if (!window.confirm("Are you sure you want to permanently delete this course? All chapters and data will be removed."))
-      return;
-
+    if (!window.confirm("Are you sure you want to permanently delete this course?")) return;
     deleteCourse(courseId).then(() => navigate("/my-courses"));
   };
 
   const handleUnenroll = () => {
-    if (!window.confirm("Are you sure you want to unenroll from this course?"))
-      return;
-
+    if (!window.confirm("Are you sure you want to unenroll from this course?")) return;
     unenrollCourse(courseId).then(() => navigate("/my-courses"));
   };
 
   const handleDeleteChapter = (chapterId) => {
-    if (!window.confirm("Are you sure you want to delete this chapter? This action cannot be undone."))
-      return;
-
+    if (!window.confirm("Are you sure you want to delete this chapter?")) return;
     deleteChapter(chapterId)
-      .then(() =>
-      setChapters(prevChapters =>
-        prevChapters.filter(ch => ch.id !== chapterId)
-      )
-    )
-    .catch(err => console.error("Delete chapter error:", err));
+      .then(() => setChapters(prev => prev.filter(ch => ch.id !== chapterId)))
+      .catch(err => console.error("Delete chapter error:", err));
   };
   
   const handleEditChapter = (chapterId) => {
@@ -119,84 +104,57 @@ function CourseDetailPage({ user }) {
 
     updateChapter(chapterId, payload)
       .then(res => {
-        setChapters(prev =>
-          prev.map(ch =>
-            ch.id === chapterId ? res.data : ch
-          )
-        );
-        setEditingChapterId(null)
+        setChapters(prev => prev.map(ch => ch.id === chapterId ? res.data : ch));
+        setEditingChapterId(null);
         setIsEditorOpen(false);
         setNewChapterTitle("");
         setEditorValue([{ type: "p", children: [{ text: "" }] }]);
       })
       .catch(err => console.error("Chapter update error:", err));
-};
+  };
 
   const handleToggleVisibility = (chapterId) => {
     toggleChapterVisibility(chapterId)
       .then(res => {
-        setChapters(prevChapters =>
-          prevChapters.map(ch =>
-            ch.id === chapterId ? { ...ch, is_public: res.data.is_public } : ch
-          )
-        );
+        setChapters(prev => prev.map(ch => ch.id === chapterId ? { ...ch, is_public: res.data.is_public } : ch));
       })
       .catch(err => console.error("Toggle visibility error:", err));
   };
 
-
   if (!course) return <p>Loading...</p>;
 
   return (
-    <div>
-      <h2>{course.title}</h2>
+    <div className="course-detail-container">
+      <h2 className="course-title">{course.title}</h2>
 
-      <Tabs value={tab} onChange={(e, val) => setTab(val)}>
+      <Tabs value={tab} onChange={(e, val) => setTab(val)} className="course-tabs">
         <Tab label="Chapters" />
         <Tab label="Students" />
         <Tab label="Settings" />
       </Tabs>
 
-      {/* ✅ Chapter Tab */}
+      {/* Chapters Tab */}
       {tab === 0 && (
-        <div>
-          <h3>Chapters</h3>
-
+        <div className="tab-content">
           {isInstructor && (
-            <button onClick={() => setIsEditorOpen(true)}>
-              ➕ Create Chapter
-            </button>
+            <button className="btn primary" onClick={() => setIsEditorOpen(true)}>➕ Create Chapter</button>
           )}
 
           {isEditorOpen && (
-            <div style={{ marginTop: 16, padding: 16, border: "1px solid #ccc" }}>
+            <div className="chapter-editor">
               <input
                 type="text"
                 placeholder="Chapter title"
                 value={newChapterTitle}
                 onChange={(e) => setNewChapterTitle(e.target.value)}
-                style={{ width: "100%", marginBottom: 10 }}
+                className="input-field"
               />
-
               <ChapterEditor value={editorValue} onChange={setEditorValue} />
-
-              <div style={{ marginTop: 10 }}>
-                <button
-                  onClick={() =>
-                    editingChapterId
-                      ? handleEditChapter(editingChapterId)
-                      : handleSaveChapter()
-                  }
-                  disabled={!newChapterTitle}
-                >
+              <div className="editor-buttons">
+                <button onClick={() => editingChapterId ? handleEditChapter(editingChapterId) : handleSaveChapter()} className="btn primary">
                   ✅ Save
                 </button>
-                <button
-                  onClick={() => setIsEditorOpen(false)}
-                  style={{ marginLeft: 10 }}
-                >
-                  Cancel
-                </button>
+                <button onClick={() => setIsEditorOpen(false)} className="btn secondary">Cancel</button>
               </div>
             </div>
           )}
@@ -204,33 +162,28 @@ function CourseDetailPage({ user }) {
           {chapters.length === 0 ? (
             <p>No chapters yet.</p>
           ) : (
-            <ul style={{ listStyle: "none", padding: 0 }}>
+            <div className="chapters-list">
               {chapters.map(ch => {
                 const isExpanded = expandedChapterId === ch.id;
-
                 return (
-                  <li key={ch.id} style={{ marginBottom: 16, borderBottom: "1px solid #ddd", paddingBottom: 10 }}>
+                  <div key={ch.id} className="chapter-card">
                     <div
-                      onClick={() =>
-                        setExpandedChapterId(isExpanded ? null : ch.id)
-                      }
-                      style={{
-                        cursor: "pointer",
-                        display: "flex",
-                        alignItems: "center"
-                      }}
+                      className="chapter-header"
+                      onClick={() => setExpandedChapterId(isExpanded ? null : ch.id)}
                     >
-                      <span style={{ marginRight: 8 }}>
-                        {isExpanded ? "▼" : "▶"}
-                      </span>
-
+                      <span className="expand-icon">{isExpanded ? "▼" : "▶"}</span>
                       <strong>{ch.title}</strong>
-                      {!ch.is_public && <span> 🔒 (Private)</span>}
+                      {ch.is_public ? (
+                        <span className="public-tag"> 🌐 </span>
+                      ) : (
+                        <span className="private-tag"> 🔒 (Private)</span>
+                      )}
                     </div>
 
+
                     {isInstructor && (
-                      <div style={{ marginTop: 6 }}>
-                        <button onClick={() => handleToggleVisibility(ch.id)} style={{ marginRight: 8 }}>
+                      <div className="chapter-actions">
+                        <button onClick={() => handleToggleVisibility(ch.id)} className="btn secondary small">
                           Toggle Visibility
                         </button>
                         <button
@@ -240,62 +193,55 @@ function CourseDetailPage({ user }) {
                             setEditorValue(JSON.parse(ch.content || '[{"type":"p","children":[{"text":""}]}]'));
                             setIsEditorOpen(true);
                           }}
-                          style={{ marginRight: 8 }}
+                          className="btn primary small"
                         >
                           Edit
                         </button>
-                        <button
-                          onClick={() => handleDeleteChapter(ch.id)}
-                          style={{ color: "red" }}
-                        >
-                          Delete ❌
+                        <button onClick={() => handleDeleteChapter(ch.id)} className="btn danger small">
+                          Delete ✖
                         </button>
                       </div>
                     )}
 
+
                     {isExpanded && (
-                      <div style={{ marginTop: 12, padding: 12, background: "#fafafa", borderRadius: 6 }}>
+                      <div className="chapter-content">
                         <ChapterViewer content={ch.content} />
                       </div>
                     )}
-                  </li>
+                  </div>
                 );
               })}
-            </ul>
-
+            </div>
           )}
         </div>
       )}
 
       {/* Students Tab */}
       {tab === 1 && (
-        <div>
-          <h3>Students</h3>
-          {students.map(s => (
-            <li key={s.id}>
-              {s.first_name} {s.last_name} ({s.email})
-              {isInstructor && s.id !== user.id && (
-                <button onClick={() => handleRemoveStudent(s.id)} style = {{ color: "red", marginLeft: 5}}>
-                  Remove ❌
-                </button>
-              )}
-            </li>
-          ))}
+        <div className="tab-content students-tab">
+          {students.length === 0 ? <p>No students enrolled yet.</p> : (
+            <ul>
+              {students.map(s => (
+                <li key={s.id} className="student-item">
+                  {s.first_name} {s.last_name} ({s.email})
+                  {isInstructor && s.id !== user.id && (
+                    <button onClick={() => handleRemoveStudent(s.id)} className="btn danger small">Remove ✖</button>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       )}
 
       {/* Settings Tab */}
       {tab === 2 && (
-        <div>
-          <h3>Settings</h3>
+        <div className="tab-content">
           {isInstructor ? (
-            <button onClick={handleDeleteCourse} style={{ color: "red" }}>
-              Delete Course ❌
-            </button>
+            <button onClick={handleDeleteCourse} className="btn danger">Delete Course ✖</button>
           ) : (
-            <button onClick={handleUnenroll} style={{ color: "red" }}>
-              Unenroll ❌
-            </button>
+            <button onClick={handleUnenroll} className="btn danger">Unenroll ✖</button>
           )}
         </div>
       )}
