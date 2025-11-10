@@ -13,7 +13,8 @@ import {
   toggleChapterVisibility,
 } from "./api";
 import { Tabs, Tab, fabClasses } from "@mui/material";
-import ChapterEditor from "./ChapterEditor"; // ✅ Import Plate Editor
+import ChapterEditor from "./ChapterEditor"; 
+import ChapterViewer from "./ChapterViewer";
 
 function CourseDetailPage({ user }) {
   const { id: courseId } = useParams();
@@ -33,6 +34,7 @@ function CourseDetailPage({ user }) {
   ]);
   const [newChapterTitle, setNewChapterTitle] = useState("");
   const [editingChapterId, setEditingChapterId] = useState(null);
+  const [expandedChapterId, setExpandedChapterId] = useState(null);
 
   const isInstructor = user?.role === "instructor";
 
@@ -143,8 +145,6 @@ function CourseDetailPage({ user }) {
   };
 
 
-  
-
   if (!course) return <p>Loading...</p>;
 
   return (
@@ -204,36 +204,65 @@ function CourseDetailPage({ user }) {
           {chapters.length === 0 ? (
             <p>No chapters yet.</p>
           ) : (
-            <ul>
-              {chapters.map(ch => (
-                <li key={ch.id}>
-                  <strong>{ch.title}</strong>
-                  {!ch.is_public && <span> 🔒 (Private)</span>}
-                  
-                  {isInstructor && (
-                    <>
-                      <button onClick={() => handleToggleVisibility(ch.id)} style={{ marginLeft: 10 }}>
-                        Toggle Visibility
-                      </button>
-                      <button
-                        onClick={() => {
-                          setEditingChapterId(ch.id)
-                          setNewChapterTitle(ch.title);
-                          setEditorValue(JSON.parse(ch.content || '[{"type":"p","children":[{"text":""}]}]'));
-                          setIsEditorOpen(true);
-                        }}
-                        style={{ marginLeft: 5 }}
-                      >
-                        Edit
-                      </button>
-                      <button onClick={() => handleDeleteChapter(ch.id)} style={{ color: "red", marginLeft: 5 }}>
-                        Delete Chapter ❌
-                      </button>
-                    </>
-                  )}
-                </li>
-              ))}
+            <ul style={{ listStyle: "none", padding: 0 }}>
+              {chapters.map(ch => {
+                const isExpanded = expandedChapterId === ch.id;
+
+                return (
+                  <li key={ch.id} style={{ marginBottom: 16, borderBottom: "1px solid #ddd", paddingBottom: 10 }}>
+                    <div
+                      onClick={() =>
+                        setExpandedChapterId(isExpanded ? null : ch.id)
+                      }
+                      style={{
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center"
+                      }}
+                    >
+                      <span style={{ marginRight: 8 }}>
+                        {isExpanded ? "▼" : "▶"}
+                      </span>
+
+                      <strong>{ch.title}</strong>
+                      {!ch.is_public && <span> 🔒 (Private)</span>}
+                    </div>
+
+                    {isInstructor && (
+                      <div style={{ marginTop: 6 }}>
+                        <button onClick={() => handleToggleVisibility(ch.id)} style={{ marginRight: 8 }}>
+                          Toggle Visibility
+                        </button>
+                        <button
+                          onClick={() => {
+                            setEditingChapterId(ch.id);
+                            setNewChapterTitle(ch.title);
+                            setEditorValue(JSON.parse(ch.content || '[{"type":"p","children":[{"text":""}]}]'));
+                            setIsEditorOpen(true);
+                          }}
+                          style={{ marginRight: 8 }}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDeleteChapter(ch.id)}
+                          style={{ color: "red" }}
+                        >
+                          Delete ❌
+                        </button>
+                      </div>
+                    )}
+                    
+                    {isExpanded && (
+                      <div style={{ marginTop: 12, padding: 12, background: "#fafafa", borderRadius: 6 }}>
+                        <ChapterViewer content={ch.content} />
+                      </div>
+                    )}
+                  </li>
+                );
+              })}
             </ul>
+
           )}
         </div>
       )}
